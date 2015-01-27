@@ -45,9 +45,9 @@ func main() {
 	// server to serve static assets, and you'll have to uncomment the next three
 	// lines
 
-	//http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("./js"))))
-	//http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./css"))))
-	//http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(http.Dir("./img"))))
+	http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("./js"))))
+	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./css"))))
+	http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(http.Dir("./img"))))
 
 	http.Handle("/", r)
 
@@ -186,6 +186,7 @@ func answerHandler(w http.ResponseWriter, r *http.Request) {
 			player.Hand,
 		}
 
+		h.broadcast <- refreshMessageJSON()
 		resp, _ := json.Marshal(data)
 		w.Write(resp)
 
@@ -260,6 +261,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 				player.Img,
 				player.Score,
 				player == game.Judge,
+				len(player.Answer) != 0,
 			}
 		} else {
 			statuses[i] = PlayerStatus{}

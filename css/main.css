@@ -80,6 +80,14 @@ html, body {
   background-position: center center;
 }
 
+.section.answered {
+  border: 1px solid green;
+}
+
+.section.not-answered {
+  border: 1px solid red;
+}
+
 .section:hover {
   opacity: 1;
 }

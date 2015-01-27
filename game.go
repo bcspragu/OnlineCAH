@@ -196,6 +196,7 @@ func (g *Game) ClearAnswers() {
 }
 
 func (g *Game) SetJudge() {
+	// If there is no Judge, set the first person to be the judge
 	if g.Judge == nil {
 		for _, player := range g.Players {
 			if player.LoggedIn {
@@ -204,16 +205,20 @@ func (g *Game) SetJudge() {
 			}
 		}
 	}
-	seen := false
-	for {
-		for _, player := range g.Players {
-			if seen && player.LoggedIn {
-				g.Judge = player
-				return
-			}
-			if player == g.Judge {
-				seen = true
-			}
+	judgeIndex := 0
+	// Otherwise, find who the current judge is, and find the next logged in player after them
+	for i, player := range g.Players {
+		if player == g.Judge {
+			judgeIndex = i
+			break
+		}
+	}
+
+	for i := 1; i <= len(g.Players); i++ {
+		player := g.Players[(i+judgeIndex)%len(g.Players)]
+		if player.LoggedIn {
+			g.Judge = player
+			return
 		}
 	}
 }

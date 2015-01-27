@@ -17,10 +17,11 @@ func randSeq(n int) string {
 }
 
 type PlayerStatus struct {
-	Name  string
-	Img   string
-	Score int
-	Judge bool
+	Name     string
+	Img      string
+	Score    int
+	Judge    bool
+	Answered bool
 }
 
 type SocketAction struct {

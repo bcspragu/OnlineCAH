@@ -201,7 +201,12 @@ function updateBoard(callback) {
         if(players[i].Judge) {
           section.find('.judge').removeClass('hide');
         } else {
-          section.find('.judge').addClass('hide');
+          // If you aren't the judge, check if you've voted
+          if(players[i].Answered) {
+            section.addClass('answered');
+          } else {
+            section.addClass('not-answered');
+          }
         }
         var progress = section.find('.prog');
         var name = section.find('.name');
