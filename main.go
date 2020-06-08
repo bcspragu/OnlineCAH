@@ -2,11 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"html/template"
+	"flag"
 	"log"
 	"net/http"
-	"os"
+
+	"github.com/gorilla/mux"
 )
 
 type State int
@@ -22,16 +22,23 @@ const (
 	GameOver
 )
 
-var templates = template.Must(template.ParseGlob("templates/*"))
-
 var game = CreateGame("cards.json", "players.json")
 
 func main() {
+	var (
+		addr        = flag.String("addr", ":8080", "The address to host the server on")
+		serveStatic = flag.Bool("serve_static", true, "Whether or not to host static files")
+	)
+	flag.Parse()
+
 	go h.run()
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/", mainHandler).Methods("GET")
+	// Rendering the main page
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "templates/index.html")
+	}).Methods("GET")
 	r.HandleFunc("/status", statusHandler).Methods("GET")
 	r.HandleFunc("/login", loginHandler).Methods("POST")
 	r.HandleFunc("/startitup", startHandler).Methods("GET")
@@ -42,33 +49,20 @@ func main() {
 	r.HandleFunc("/judge", judgeHandler).Methods("POST")
 
 	// Depending on whether or not you're using a proxy, you might need this
-	// server to serve static assets, and you'll have to uncomment the next three
-	// lines
-
-	http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("./js"))))
-	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./css"))))
-	http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(http.Dir("./img"))))
+	// server to serve static assets.
+	if *serveStatic {
+		http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("./js"))))
+		http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./css"))))
+		http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(http.Dir("./img"))))
+	}
 
 	http.Handle("/", r)
 
 	log.Println("Starting server...")
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "3100"
-	}
-
-	err := http.ListenAndServe(":"+port, nil)
+	err := http.ListenAndServe(*addr, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
-	}
-}
-
-// Rendering the main page
-func mainHandler(w http.ResponseWriter, r *http.Request) {
-	err := templates.ExecuteTemplate(w, "index.html", r.Host)
-	if err != nil {
-		log.Print("Error executing template:", err)
 	}
 }
 

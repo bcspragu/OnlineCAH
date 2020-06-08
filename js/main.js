@@ -50,7 +50,15 @@ $(function() {
           }
         });
         if (Modernizr.websockets) {
-          conn = new WebSocket("ws://" + socketAddr + "/ws?handshake=" + handshake);
+          var loc = window.location, newUri;
+          if (loc.protocol === "https:") {
+              newUri = "wss:";
+          } else {
+              newUri = "ws:";
+          }
+          newUri += "//" + loc.host;
+          newUri += loc.pathname + "ws?handshake=";
+          conn = new WebSocket(newUri + handshake);
           conn.onerror = function(evt) {
             showError("Trying to sneak past the handshake asshole?");
           }
